@@ -22,7 +22,7 @@ A/D旋轉砲台 Q/E矯正砲管 W/S移動戰車 生成標靶打中獲得1分
 <script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
 <script>
     var renderer, camera, controls, scene, axes,trun=false,cannon,goal,score,turn,turret;
-var stats;
+var stats,light,light2;
 var keyboard = new KeyboardState();
 var theta1 = -0.2;
 var theta2 = 0.2;
@@ -73,7 +73,7 @@ class balls{
 function buildParts() {
     var parts = [];
     
-	var mat = new THREE.MeshNormalMaterial()
+	var mat = new THREE.MeshPhongMaterial({color:0x2a5929});
 	var base = new THREE.Object3D();
 	var baseMesh = new THREE.Mesh (new THREE.BoxGeometry (40,10,20), mat);
 	base.add (baseMesh);
@@ -152,12 +152,18 @@ function init() {
   tank = buildTank();
   
   scene.add (tank);
-  goal = new THREE.Mesh(new THREE.BoxGeometry (10,10,10),new THREE.MeshNormalMaterial());
+  goal = new THREE.Mesh(new THREE.BoxGeometry (10,10,10),new THREE.MeshPhongMaterial());
   var ran1 = Math.random() <0.5 ? -1:1;
   ran1*=100;
   var ran2 = Math.floor(Math.random()*50)+1; 
   goal.position.set(ran1,ran2,0);
   scene.add(goal);
+
+  light = new THREE.PointLight(0xffffff,1,500);
+  light2 = new THREE.PointLight(0xffffff,1,500);
+  light.position.set(0,40,30);
+  light2.position.set(0,40,-30);
+  scene.add(light,light2);
 }
 
 function animate() {
@@ -191,7 +197,7 @@ function animate() {
   }
   
   if(keyboard.down("F")){
-  		let ball = new THREE.Mesh(new THREE.SphereGeometry(2,20,20),new THREE.MeshNormalMaterial());
+  		let ball = new THREE.Mesh(new THREE.SphereGeometry(2,20,20),new THREE.MeshPhongMaterial());
       let tip = cannon.localToWorld(new THREE.Vector3(10,0,0));
       var root = cannon.localToWorld(new THREE.Vector3(0,0,0));
       ball.position.copy(tip);
