@@ -74,19 +74,15 @@
             this.dead=0;
         }
         update(dt){
+            if(this.get!=1){
                 this.mesh.rotation.y-=this.life*0.1;
+            }
             if(this.life >= 0){
-                if(this.get==0){
                 this.life-=0.005;
                 this.mat.uniforms.opacity.value-=0.005;
-                }
-                else{
-                    this.life-=0.005;
-                }
             }
             if(this.life <= 0.0 ){
-                    if(this.get!=1){
-                    scene.remove(this.mesh);
+                scene.remove(this.mesh);
                 if(this.dead==0){
                     teanum--;
                     this.dead=1;
@@ -94,7 +90,6 @@
                 document.getElementById("score").innerText=teanum;
                 }
             }
-        }
         
         check(tx,ty,tz){
             if(this.life>=0){
@@ -107,7 +102,6 @@
             }
         }
         }
-            
         }
 
         var scene, renderer, camera,teapot;
