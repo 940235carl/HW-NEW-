@@ -48,20 +48,27 @@
   uniform float gran;
   vec2 vUvm;
   uniform vec2 headNDC;
-  
-  
+  uniform float headSize;
+
   void main() {
-    float d = distance (headNDC, vUv); 
-    if (d < 0.10) {
+    float d = distance (headNDC, vUv);
+    float borderWidth = headSize*0.1; 
+    if (d < headSize) {
   	  vUvm = floor (vUv/gran)*gran;     
   		gl_FragColor = texture2D(texture, vUvm); 
-    } else if (d < 0.11) {
-       gl_FragColor = vec4(0,0,1,1);
+    } else if (d < headSize+borderWidth) {
+       gl_FragColor = vec4(1,0,0,1);
     } else {
       vUvm = vUv;
-      gl_FragColor = texture2D(texture, vUvm); 
+        	gl_FragColor = texture2D(texture, vUvm); 
     }
    }
+
+/*
+void main() {
+  gl_FragColor = texture2D (texture, vUv);
+}
+*/
 </script>
 <script>
     var scene, renderer, camera,skull,light,chair;
@@ -127,19 +134,23 @@
     ///////////////////////////////////////////////////////////////////////
 
     var uniforms = {
-        headNDC: {
-        type: 'v2',
-        value: null
-        },
-        texture: {
-        type: 't',
-        value: renderTarget.texture
-        }, 
-        gran: {
-        type: 'f',
-        value: 0
-        }
-    };
+      headNDC: {
+      type: 'v2',
+      value: null
+    },
+    headSize: {
+     type: 'f',
+     value: 0
+    },
+    texture: {
+      type: 't',
+      value: renderTarget.texture
+    }, 
+    gran: {
+    	type: 'f',
+      value: 0
+    }
+  };
 
 
     var vertShader = document.getElementById('vs-mosaic').innerHTML;
@@ -281,11 +292,19 @@ function animate() {
   light.position.set (70*Math.cos(angle), 100, 70*Math.sin(angle));
   // compute headNDC
   var headCenter = new THREE.Vector3(0,70,0);
-  var nose = new THREE.Vector3(0,70,-10);
   subject.localToWorld (headCenter);
+  var headTop = new THREE.Vector3(0,70+15,0);
+  subject.localToWorld (headTop);
+  var nose = new THREE.Vector3(0,70,-10);
+  subject.localToWorld(nose);
   headCenter.applyMatrix4 (camera.matrixWorldInverse).applyMatrix4 (camera.projectionMatrix);
   material_shh.uniforms.headNDC.value = new THREE.Vector2 ((headCenter.x+1)/2, (headCenter.y+1)/2);
+  headTop.applyMatrix4 (camera.matrixWorldInverse).applyMatrix4 (camera.projectionMatrix);
   nose.applyMatrix4 (camera.matrixWorldInverse).applyMatrix4 (camera.projectionMatrix);
+
+  material_shh.uniforms.gran.value = 0.01;
+  material_shh.uniforms.headSize.value = 1.2 * headTop.distanceTo(headCenter)/2;
+  
 if (nose.z - headCenter.z > 0) {
 	console.log("face forward");
     renderer.setRenderTarget (renderTarget);
@@ -298,9 +317,7 @@ if (nose.z - headCenter.z > 0) {
   	renderer.render(scene0, camera);
   
   }
-   
   
-  material_shh.uniforms.gran.value = 0.01;
   
 }
 </script>
